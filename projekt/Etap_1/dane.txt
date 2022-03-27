@@ -1,0 +1,15 @@
+* Piotr Rojek; piotrekpiotr2@gmail.com; Grupa 1ID21B.
+
+* Temat: Pluginy (plugin do generowania diagramu klas dla środowiska IntelliJ)
+
+* Technologie: Java, środowisko IntelliJ
+
+* Realistyczny harmonogram pracy wraz z listą funkcjonalności, które zostaną zaimplementowane: -,
+
+* Podział prac w zespole : n/d - zespół jednoosobowy
+
+* Temat projektu z "Programowanie systemów rozproszonych": Łamacz haseł.
+
+* Tematy prac inżynierskich: 
+
+Piotr Rojekt: System rekomendacji filmów wykorzystujący metody uczenia maszynowego
