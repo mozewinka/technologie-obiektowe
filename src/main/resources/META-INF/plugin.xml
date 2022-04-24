@@ -22,10 +22,11 @@
     </applicationListeners>
     
     <actions>
-        <group id="Technologie-Obiektowe.DemoAction" text="Technologie-Obiektowe" description="Demo">
-            <add-to-group group-id="MainMenu" anchor="last"/>
-            <action class="com.github.mozewinka.technologieobiektowe.DemoAction"
-                    id="Technologie-Obiektowe.Actions.DemoAction" text="Lista Klas"/>
+        <group id="Technologie-Obiektowe.ClassListAction" text="Technologie Obiektowe"
+               description="Placeholder" popup="true">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+            <action id="com.github.mozewinka.technologieobiektowe.ClassListAction"
+                    class="com.github.mozewinka.technologieobiektowe.ClassListAction" text="Lista Klas"/>
         </group>
     </actions>
 </idea-plugin>

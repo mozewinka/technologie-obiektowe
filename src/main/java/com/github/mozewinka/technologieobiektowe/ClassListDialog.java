@@ -4,19 +4,22 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiParameterList;
+import com.intellij.psi.util.PsiUtil;
 import com.intellij.ui.components.JBList;
 
 import javax.swing.*;
+import java.util.HashMap;
 import java.util.Objects;
 
 public class ClassListDialog extends JDialog {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
-    private JBList<PsiClass> classes;
+    private JBList<String> classes;
     private JBList<String> fields;
     private JBList<String> methods;
     private JBList<String> interfaces;
+    private final HashMap<String, PsiClass> classesMap;
 
     public ClassListDialog(PsiClass[] data) {
         setContentPane(contentPane);
@@ -24,7 +27,8 @@ public class ClassListDialog extends JDialog {
         getRootPane().setDefaultButton(buttonOK);
         setTitle("Lista Klas Projektu");
 
-        classes.setListData(data);
+        classesMap = classesToStringMap(data);
+        classes.setListData(classesMap.keySet().toArray(new String[0]));
 
         buttonOK.addActionListener(e -> onOK());
         buttonCancel.addActionListener(e -> onOK());
@@ -39,8 +43,16 @@ public class ClassListDialog extends JDialog {
         dispose();
     }
 
+    private HashMap<String, PsiClass> classesToStringMap(PsiClass[] classesArray) {
+        HashMap<String, PsiClass> classMap = new HashMap<>();
+        for (PsiClass c : classesArray) {
+            classMap.put(c.getName() + " (" + PsiUtil.getPackageName(c) + ")", c);
+        }
+        return classMap;
+    }
+
     private String[] fieldsToString() {
-        PsiField[] arr = classes.getSelectedValue().getFields();
+        PsiField[] arr = classesMap.get(classes.getSelectedValue()).getFields();
         String[] fieldsArray = new String[arr.length];
         
         for (int i = 0; i < arr.length; i++) {
@@ -48,12 +60,11 @@ public class ClassListDialog extends JDialog {
                     + " : "
                     + arr[i].getType().getPresentableText();
         }
-
         return fieldsArray;
     }
 
     private String[] methodsToString() {
-        PsiMethod[] arr = classes.getSelectedValue().getMethods();
+        PsiMethod[] arr = classesMap.get(classes.getSelectedValue()).getMethods();
         String[] methodsArray = new String[arr.length];
 
         for (int i = 0; i < arr.length; i++) {
@@ -82,19 +93,17 @@ public class ClassListDialog extends JDialog {
                     + "(" + parameters + ")"
                     + type;
         }
-
         return methodsArray;
     }
 
     private String[] interfacesToString() {
-        PsiClass[] arr = classes.getSelectedValue().getInterfaces();
+        PsiClass[] arr = classesMap.get(classes.getSelectedValue()).getInterfaces();
         String[] interfacesArray = new String[arr.length];
 
         for (int i = 0; i < arr.length; i++) {
             String[] qualifiedName = Objects.requireNonNull(arr[i].getQualifiedName()).split("\\.");
             interfacesArray[i] = qualifiedName[qualifiedName.length - 1]; // non-qualified name
         }
-
         return interfacesArray;
     }
 }
