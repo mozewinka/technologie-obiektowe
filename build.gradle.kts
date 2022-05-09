@@ -48,6 +48,10 @@ qodana {
     showReport.set(System.getenv("QODANA_SHOW_REPORT")?.toBoolean() ?: false)
 }
 
+dependencies {
+    implementation(files("lib/plantuml-1.2022.5.jar"))
+}
+
 tasks {
     // Set the JVM compatibility versions
     properties("javaVersion").let {
