@@ -1,9 +1,6 @@
 package com.github.mozewinka.technologieobiektowe;
 
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiField;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiParameterList;
+import com.intellij.psi.*;
 import com.intellij.ui.components.JBList;
 import com.intellij.ui.components.JBScrollPane;
 import net.sourceforge.plantuml.GeneratedImage;
@@ -57,7 +54,7 @@ public class ClassListDialog extends JDialog {
     private void onGenerate() throws IOException {
         saveDiagramToFile();
         SourceFileReader reader = new SourceFileReader(new File("diagram.plantuml"));
-        List <GeneratedImage> list = reader.getGeneratedImages();
+        List<GeneratedImage> list = reader.getGeneratedImages();
         File diagramPng = list.get(0).getPngFile();
         BufferedImage image = ImageIO.read(diagramPng);
 
@@ -68,22 +65,12 @@ public class ClassListDialog extends JDialog {
         JFrame frame = new JFrame("Diagram klas projektu");
         JBScrollPane scrollPane = new JBScrollPane(label);
         frame.add(scrollPane, BorderLayout.CENTER);
-//        frame.getContentPane().add(label, BorderLayout.CENTER);
-//        JPanel panel = new JPanel() {
-//            @Override
-//            public void paint(Graphics graphics) {
-//                try {
-//                    graphics.drawImage(ImageIO.read(diagramPng), 0, 0, this);
-//                } catch (IOException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            }
-//        };
-//        frame.add(panel);
+
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+        frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
     }
 
     private void onClose() {
@@ -92,28 +79,40 @@ public class ClassListDialog extends JDialog {
 
     private void saveDiagramToFile() throws IOException {
         FileWriter diagramWriter = new FileWriter("diagram.plantuml");
+//        File temp = new File("diagram.plantuml");
+//        System.out.println(temp.getAbsolutePath());
+
         diagramWriter.write("@startuml\n\n");
 
         for (var entry : classesMap.entrySet()) {
-            diagramWriter.write("class " + entry.getKey() + " {\n");
+            if (entry.getValue().isEnum()) {
+                diagramWriter.write("enum " + entry.getKey() + " {\n");
+            } else if (entry.getValue().isInterface()) {
+                diagramWriter.write("interface " + entry.getKey() + " {\n");
+            } else if (entry.getValue().hasModifierProperty(PsiModifier.ABSTRACT)) {
+                diagramWriter.write("abstract class " + entry.getKey() + " {\n");
+            } else {
+                diagramWriter.write("class " + entry.getKey() + " {\n");
+            }
 
             String[] methods = methodsToString(entry.getKey());
             for (var method : methods) {
-                diagramWriter.write("  + " + method + "\n");
+                diagramWriter.write("  " + method + "\n");
             }
 
             String[] interfaces = interfacesToString(entry.getKey());
             for (var inter : interfaces) {
-                diagramWriter.write("  + " + inter + "\n");
+                diagramWriter.write("  " + inter + "\n");
             }
 
             String[] fields = fieldsToString(entry.getKey());
             for (var field : fields) {
-                diagramWriter.write("  + " + field + "\n");
+                diagramWriter.write("  " + field + "\n");
             }
 
             diagramWriter.write("}\n");
         }
+
         diagramWriter.write("@enduml\n");
         diagramWriter.close();
     }
@@ -121,42 +120,43 @@ public class ClassListDialog extends JDialog {
     private HashMap<String, PsiClass> classesToStringMap(PsiClass[] classesArray) {
         HashMap<String, PsiClass> classMap = new HashMap<>();
         for (PsiClass c : classesArray) {
-            classMap.put(c.getName() /* + " (" + PsiUtil.getPackageName(c) + ")" */, c);
+            classMap.put(c.getQualifiedName(), c);
         }
         return classMap;
     }
 
     private String[] fieldsToString(String selectedClass) {
-        PsiField[] arr = classesMap.get(selectedClass).getFields();
-        String[] fieldsArray = new String[arr.length];
-        
-        for (int i = 0; i < arr.length; i++) {
-            fieldsArray[i] = arr[i].getName()
+        PsiField[] psiFieldsArray = classesMap.get(selectedClass).getFields();
+        String[] fieldsArray = new String[psiFieldsArray.length];
+
+        for (int i = 0; i < psiFieldsArray.length; i++) {
+            fieldsArray[i] = getModifierSymbol(psiFieldsArray[i]) + " "
+                    + psiFieldsArray[i].getName()
                     + " : "
-                    + arr[i].getType().getPresentableText();
+                    + psiFieldsArray[i].getType().getPresentableText();
         }
         return fieldsArray;
     }
 
     private String[] methodsToString(String selectedClass) {
-        PsiMethod[] arr = classesMap.get(selectedClass).getMethods();
-        String[] methodsArray = new String[arr.length];
+        PsiMethod[] psiMethodsArray = classesMap.get(selectedClass).getMethods();
+        String[] methodsArray = new String[psiMethodsArray.length];
 
-        for (int i = 0; i < arr.length; i++) {
+        for (int i = 0; i < psiMethodsArray.length; i++) {
             String type = "";
-            if (!Objects.isNull(arr[i].getReturnType())) // if null then empty = constructor
-                type = " : " + Objects.requireNonNull(arr[i].getReturnType()).getPresentableText(); // return type
+            if (!Objects.isNull(psiMethodsArray[i].getReturnType())) // if null then empty = constructor
+                type = " : " + Objects.requireNonNull(psiMethodsArray[i].getReturnType()).getPresentableText(); // return type
 
             StringBuilder parameters = new StringBuilder();
-            if (!arr[i].getParameterList().isEmpty()) {
-                PsiParameterList psiParameterList = arr[i].getParameterList();
+            if (!psiMethodsArray[i].getParameterList().isEmpty()) {
+                PsiParameterList psiParameterList = psiMethodsArray[i].getParameterList();
                 for (int j = 0; j < psiParameterList.getParametersCount(); j++) {
                     parameters.append(Objects.requireNonNull(psiParameterList
-                                    .getParameter(j))
+                                            .getParameter(j))
                                     .getName())
                             .append(" : ")
                             .append(Objects.requireNonNull(psiParameterList
-                                    .getParameter(j))
+                                            .getParameter(j))
                                     .getType()
                                     .getPresentableText())
                             .append(", ");
@@ -164,7 +164,8 @@ public class ClassListDialog extends JDialog {
                 parameters = new StringBuilder(parameters.substring(0, parameters.length() - 2));
             }
 
-            methodsArray[i] = arr[i].getName()
+            methodsArray[i] = getModifierSymbol(psiMethodsArray[i]) + " "
+                    + psiMethodsArray[i].getName()
                     + "(" + parameters + ")"
                     + type;
         }
@@ -172,13 +173,28 @@ public class ClassListDialog extends JDialog {
     }
 
     private String[] interfacesToString(String selectedClass) {
-        PsiClass[] arr = classesMap.get(selectedClass).getInterfaces();
-        String[] interfacesArray = new String[arr.length];
+        PsiClass[] psiClassesArray = classesMap.get(selectedClass).getInterfaces();
+        String[] interfacesArray = new String[psiClassesArray.length];
 
-        for (int i = 0; i < arr.length; i++) {
-            String[] qualifiedName = Objects.requireNonNull(arr[i].getQualifiedName()).split("\\.");
-            interfacesArray[i] = qualifiedName[qualifiedName.length - 1]; // non-qualified name
+        for (int i = 0; i < psiClassesArray.length; i++) {
+            String[] qualifiedName = Objects.requireNonNull(psiClassesArray[i].getQualifiedName()).split("\\.");
+            interfacesArray[i] = getModifierSymbol(psiClassesArray[i]) + " "
+                    + qualifiedName[qualifiedName.length - 1]; // non-qualified name
         }
         return interfacesArray;
+    }
+
+    private String getModifierSymbol(PsiModifierListOwner element) {
+        String symbol = "";
+        if (element.hasModifierProperty(PsiModifier.PRIVATE)) {
+            symbol = "-";
+        } else if (element.hasModifierProperty(PsiModifier.PROTECTED)) {
+            symbol = "#";
+        } else if (element.hasModifierProperty(PsiModifier.PACKAGE_LOCAL)) {
+            symbol = "~";
+        } else if (element.hasModifierProperty(PsiModifier.PUBLIC)) {
+            symbol = "+";
+        }
+        return symbol;
     }
 }
