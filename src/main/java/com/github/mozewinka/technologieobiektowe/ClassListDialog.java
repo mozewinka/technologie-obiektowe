@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -26,6 +27,7 @@ public class ClassListDialog extends JDialog {
     private JBList<String> methods;
     private JBList<String> interfaces;
     private final HashMap<String, PsiClass> classesMap;
+    private final HashSet<String> relationships;
 
     public ClassListDialog(PsiClass[] data) {
         setContentPane(contentPane);
@@ -35,6 +37,7 @@ public class ClassListDialog extends JDialog {
 
         classesMap = classesToStringMap(data);
         classes.setListData(classesMap.keySet().toArray(new String[0]));
+        relationships = new HashSet<>();
 
         buttonGenerate.addActionListener(e -> {
             try {
@@ -79,8 +82,8 @@ public class ClassListDialog extends JDialog {
 
     private void saveDiagramToFile() throws IOException {
         FileWriter diagramWriter = new FileWriter("diagram.plantuml");
-//        File temp = new File("diagram.plantuml");
-//        System.out.println(temp.getAbsolutePath());
+        File temp = new File("diagram.plantuml");
+        System.out.println(temp.getAbsolutePath());
 
         diagramWriter.write("@startuml\n\n");
 
@@ -113,6 +116,10 @@ public class ClassListDialog extends JDialog {
             diagramWriter.write("}\n");
         }
 
+        for (var relation : relationships) {
+            diagramWriter.write("  " + relation);
+        }
+
         diagramWriter.write("@enduml\n");
         diagramWriter.close();
     }
@@ -130,10 +137,11 @@ public class ClassListDialog extends JDialog {
         String[] fieldsArray = new String[psiFieldsArray.length];
 
         for (int i = 0; i < psiFieldsArray.length; i++) {
-            fieldsArray[i] = getModifierSymbol(psiFieldsArray[i]) + " "
-                    + psiFieldsArray[i].getName()
-                    + " : "
-                    + psiFieldsArray[i].getType().getPresentableText();
+            PsiType type = psiFieldsArray[i].getType();
+            String name = psiFieldsArray[i].getName();
+            fieldsArray[i] = getModifierSymbol(psiFieldsArray[i]) + " " + name + " : " + type.getPresentableText();
+
+            addRelationship(type.getCanonicalText(), selectedClass);
         }
         return fieldsArray;
     }
@@ -144,21 +152,22 @@ public class ClassListDialog extends JDialog {
 
         for (int i = 0; i < psiMethodsArray.length; i++) {
             String type = "";
-            if (!Objects.isNull(psiMethodsArray[i].getReturnType())) // if null then empty = constructor
+            if (!Objects.isNull(psiMethodsArray[i].getReturnType())) { // if null then empty = constructor
                 type = " : " + Objects.requireNonNull(psiMethodsArray[i].getReturnType()).getPresentableText(); // return type
+
+                String canonicalType = Objects.requireNonNull(psiMethodsArray[i].getReturnType()).getCanonicalText();
+                addRelationship(canonicalType, selectedClass);
+            }
+
 
             StringBuilder parameters = new StringBuilder();
             if (!psiMethodsArray[i].getParameterList().isEmpty()) {
                 PsiParameterList psiParameterList = psiMethodsArray[i].getParameterList();
                 for (int j = 0; j < psiParameterList.getParametersCount(); j++) {
-                    parameters.append(Objects.requireNonNull(psiParameterList
-                                            .getParameter(j))
-                                    .getName())
+                    parameters.append(Objects.requireNonNull(psiParameterList.getParameter(j)).getName())
                             .append(" : ")
-                            .append(Objects.requireNonNull(psiParameterList
-                                            .getParameter(j))
-                                    .getType()
-                                    .getPresentableText())
+                            .append(Objects.requireNonNull(psiParameterList.getParameter(j))
+                                    .getType().getPresentableText())
                             .append(", ");
                 }
                 parameters = new StringBuilder(parameters.substring(0, parameters.length() - 2));
@@ -196,5 +205,12 @@ public class ClassListDialog extends JDialog {
             symbol = "+";
         }
         return symbol;
+    }
+
+    private void addRelationship(String canonicalType, String selectedClass) {
+        canonicalType = canonicalType.replaceAll("\\[]", "");
+        if (classesMap.containsKey(canonicalType) && !Objects.equals(selectedClass, canonicalType)) {
+            relationships.add(selectedClass + " o-- " + canonicalType + "\n");
+        }
     }
 }
