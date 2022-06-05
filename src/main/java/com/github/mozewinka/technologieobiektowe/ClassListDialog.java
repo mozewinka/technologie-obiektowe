@@ -2,14 +2,11 @@ package com.github.mozewinka.technologieobiektowe;
 
 import com.intellij.psi.*;
 import com.intellij.ui.components.JBList;
-import com.intellij.ui.components.JBScrollPane;
 import net.sourceforge.plantuml.GeneratedImage;
 import net.sourceforge.plantuml.SourceFileReader;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -59,21 +56,24 @@ public class ClassListDialog extends JDialog {
         SourceFileReader reader = new SourceFileReader(new File("diagram.plantuml"));
         List<GeneratedImage> list = reader.getGeneratedImages();
         File diagramPng = list.get(0).getPngFile();
-        BufferedImage image = ImageIO.read(diagramPng);
+//        BufferedImage image = ImageIO.read(diagramPng);
 
-        ImageIcon imageIcon = new ImageIcon(image);
-        JLabel label = new JLabel();
-        label.setIcon(imageIcon);
+        Desktop desktop = Desktop.getDesktop();
+        desktop.open(diagramPng);
 
-        JFrame frame = new JFrame("Diagram klas projektu");
-        JBScrollPane scrollPane = new JBScrollPane(label);
-        frame.add(scrollPane, BorderLayout.CENTER);
-
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.pack();
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
-        frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+//        ImageIcon imageIcon = new ImageIcon(image);
+//        JLabel label = new JLabel();
+//        label.setIcon(imageIcon);
+//
+//        JFrame frame = new JFrame("Diagram klas projektu");
+//        JBScrollPane scrollPane = new JBScrollPane(label);
+//        frame.add(scrollPane, BorderLayout.CENTER);
+//
+//        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+//        frame.pack();
+//        frame.setLocationRelativeTo(null);
+//        frame.setVisible(true);
+//        frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
     }
 
     private void onClose() {
