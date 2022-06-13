@@ -12,19 +12,24 @@ import static com.github.mozewinka.technologieobiektowe.Modifiers.getModifierSym
 
 public class ClassHelper {
 
+    public final HashSet<PsiClass> classes;
+    public final HashSet<PsiPackage> packages;
     public final HashMap<String, PsiClass> classesMap;
     public static final HashSet<String> relationships = new HashSet<>();
     private final ProjectOnlySearchScope searchScope;
 
     public ClassHelper(Project project) {
         searchScope = new ProjectOnlySearchScope(project);
+        packages = new HashSet<>();
+        classes = new HashSet<>();
 
         ProjectRootManager projectRootManager = ProjectRootManager.getInstance(project);
         PsiManager psiManager = PsiManager.getInstance(project);
         VirtualFile[] directories = projectRootManager.getContentSourceRoots();
         List<PsiClass> psiClasses = getClasses(directories, psiManager);
-        PsiClass[] classes = psiClasses.toArray(new PsiClass[0]);
+        classes.addAll(psiClasses);
 
+        PsiClass[] classes = psiClasses.toArray(new PsiClass[0]);
         classesMap = classesToStringMap(classes);
     }
 
@@ -41,6 +46,9 @@ public class ClassHelper {
     private void addClasses (PsiDirectory psiDirectory, List<PsiClass> classes) {
         PsiPackage psiPackage = JavaDirectoryService.getInstance().getPackage(psiDirectory);
         if (psiPackage != null) {
+            if (psiPackage.getSubPackages().length == 0) {
+                packages.add(psiPackage);
+            }
             PsiClass[] packageClasses = psiPackage.getClasses();
             for (PsiClass psiClass : packageClasses) {
                 if (PsiSearchScopeUtil.isInScope(searchScope, psiClass))
