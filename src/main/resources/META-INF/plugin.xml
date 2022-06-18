@@ -4,10 +4,6 @@
     <name>Technologie-Obiektowe</name>
     <vendor>mozewinka</vendor>
 
-    <description><![CDATA[
-        Plugin umożliwiający generowanie diagramów klas.
-    ]]></description>
-
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
     
@@ -16,9 +12,9 @@
                description="Main actions group" popup="true">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
             <action id="com.github.mozewinka.technologieobiektowe.ClassListAction"
-                    class="com.github.mozewinka.technologieobiektowe.ClassListAction" text="Display Class List"/>
+                    class="com.github.mozewinka.technologieobiektowe.ClassListAction" text="Show Class List"/>
             <action id="com.github.mozewinka.technologieobiektowe.MetricsAction"
-                    class="com.github.mozewinka.technologieobiektowe.MetricsAction" text="Display Metrics Window"/>
+                    class="com.github.mozewinka.technologieobiektowe.MetricsAction" text="Show Metrics"/>
         </group>
         <group id="Technologie-Obiektowe.MainGroup.DiagramGroup" text="Diagram Generation"
                description="Diagram generation group" popup="true">

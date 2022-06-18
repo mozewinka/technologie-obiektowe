@@ -85,9 +85,6 @@ public class DiagramHelper {
 
     void saveDiagramStringToFile(HashMap<String, PsiClass> classesMap) throws IOException {
         FileWriter diagramWriter = new FileWriter("diagram.plantuml");
-//        File temp = new File("diagram.plantuml");
-//        System.out.println(temp.getAbsolutePath());
-
         diagramWriter.write(getDiagramString(classesMap));
         diagramWriter.close();
     }
