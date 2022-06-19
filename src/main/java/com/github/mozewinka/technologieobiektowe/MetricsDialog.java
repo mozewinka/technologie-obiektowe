@@ -51,7 +51,7 @@ public class MetricsDialog extends JDialog {
     private void multiCounter(ClassHelper classHelper) {
         classesCount = classHelper.classes.size();
         packagesCount = classHelper.packages.size();
-        System.out.println(classHelper.packages);
+
         for (PsiClass cls : classHelper.classes) {
             linesCount += countLines(cls);
 
@@ -60,18 +60,10 @@ public class MetricsDialog extends JDialog {
             }
 
             methodsCount += cls.getMethods().length;
-            for (PsiMethod method : cls.getMethods()) {
-                if (method.hasModifierProperty(PsiModifier.STATIC)) {
-                    staticMethodsCount++;
-                }
-            }
+            staticMethodsCount += countStatic(cls.getMethods());
 
             fieldsCount += cls.getFields().length;
-            for (PsiField field : cls.getFields()) {
-                if (field.hasModifierProperty(PsiModifier.STATIC)) {
-                    staticFieldsCount++;
-                }
-            }
+            staticFieldsCount += countStatic(cls.getFields());
         }
     }
 
@@ -87,5 +79,15 @@ public class MetricsDialog extends JDialog {
         }
 
         return lines;
+    }
+
+    private int countStatic(PsiMember[] members) {
+        int count = 0;
+        for (PsiMember member : members) {
+            if (member.hasModifierProperty(PsiModifier.STATIC)) {
+                count++;
+            }
+        }
+        return count;
     }
 }

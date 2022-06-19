@@ -2,6 +2,9 @@ package com.github.mozewinka.technologieobiektowe;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiMember;
+import com.intellij.psi.PsiModifier;
+import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBList;
 
 import javax.swing.*;
@@ -19,13 +22,18 @@ public class ClassListDialog extends JDialog {
     private JBList<String> methods;
     private JBList<String> interfaces;
     private JButton buttonGenerateSvg;
+    private JLabel classesLabel;
+    private JLabel fieldsLabel;
+    private JLabel interfacesLabel;
+    private JLabel methodsLabel;
+    private JLabel depthLabel;
     private final ClassHelper classHelper;
     private final DiagramHelper diagramHelper;
 
     public ClassListDialog(Project project) {
         setContentPane(contentPane);
         setModal(false);
-        getRootPane().setDefaultButton(buttonGeneratePng);
+        getRootPane().setDefaultButton(buttonGenerateSvg);
         setTitle("Project class list");
 
         classHelper = new ClassHelper(project);
@@ -33,10 +41,28 @@ public class ClassListDialog extends JDialog {
 
         HashMap<String, PsiClass> classesMap = classHelper.classesMap;
         classes.setListData(classesMap.keySet().toArray(new String[0]));
+        classesLabel.setText("Classes and interfaces: " + classes.getItemsCount());
         classes.addListSelectionListener(e -> {
             fields.setListData(ClassHelper.fieldsToString(classes.getSelectedValue(), classesMap));
+            fieldsLabel.setText("Fields: " + fields.getItemsCount() + " (" +
+                    countStatic(classesMap.get(classes.getSelectedValue()).getFields()) + " static)");
+
             methods.setListData(ClassHelper.methodsToString(classes.getSelectedValue(), classesMap));
+            methodsLabel.setText("Methods: " + methods.getItemsCount() + " (" +
+                    countStatic(classesMap.get(classes.getSelectedValue()).getMethods()) + " static)");
+
             interfaces.setListData(ClassHelper.interfacesToString(classes.getSelectedValue(), classesMap));
+            int interfacesCount = interfaces.getItemsCount();
+            interfacesLabel.setText("Interfaces: " + interfacesCount);
+            if (interfacesCount < 6) {
+                interfacesLabel.setForeground(JBColor.GREEN);
+            } else if (interfacesCount < 12) {
+                interfacesLabel.setForeground(JBColor.ORANGE);
+            } else {
+                interfacesLabel.setForeground(JBColor.RED);
+            }
+
+            depthLabel.setText("Depth of Inheritance Tree: " + getDepth(classesMap.get(classes.getSelectedValue())));
         });
 
         buttonGeneratePng.addActionListener(e -> {
@@ -69,4 +95,29 @@ public class ClassListDialog extends JDialog {
         dispose();
     }
 
+    private int countStatic(PsiMember[] members) {
+        int count = 0;
+        for (PsiMember member : members) {
+            if (member.hasModifierProperty(PsiModifier.STATIC)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private int getDepth(PsiClass cls) {
+        int depth = 0;
+        while (cls.getSuperClass() != null) {
+            cls = cls.getSuperClass();
+            depth++;
+        }
+        if (depth < 5) {
+            depthLabel.setForeground(JBColor.GREEN);
+        } else if (depth < 9) {
+            depthLabel.setForeground(JBColor.ORANGE);
+        } else {
+            depthLabel.setForeground(JBColor.RED);
+        }
+        return depth;
+    }
 }
