@@ -1,5 +1,6 @@
 package com.github.mozewinka.technologieobiektowe;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMember;
@@ -14,6 +15,8 @@ import java.util.HashMap;
 
 public class ClassListDialog extends JDialog {
 
+    private final Settings settings = ApplicationManager.getApplication().getService(Settings.class);
+
     private JPanel contentPane;
     private JButton buttonGeneratePng;
     private JButton buttonClose;
@@ -27,6 +30,7 @@ public class ClassListDialog extends JDialog {
     private JLabel interfacesLabel;
     private JLabel methodsLabel;
     private JLabel depthLabel;
+
     private final ClassHelper classHelper;
     private final DiagramHelper diagramHelper;
 
@@ -54,9 +58,9 @@ public class ClassListDialog extends JDialog {
             interfaces.setListData(ClassHelper.interfacesToString(classes.getSelectedValue(), classesMap));
             int interfacesCount = interfaces.getItemsCount();
             interfacesLabel.setText("Interfaces: " + interfacesCount);
-            if (interfacesCount < 6) {
+            if (interfacesCount < settings.getMediumInterfaceThreshold()) {
                 interfacesLabel.setForeground(JBColor.GREEN);
-            } else if (interfacesCount < 12) {
+            } else if (interfacesCount < settings.getHighInterfaceThreshold()) {
                 interfacesLabel.setForeground(JBColor.ORANGE);
             } else {
                 interfacesLabel.setForeground(JBColor.RED);
@@ -111,9 +115,9 @@ public class ClassListDialog extends JDialog {
             cls = cls.getSuperClass();
             depth++;
         }
-        if (depth < 5) {
+        if (depth < settings.getMediumDepthThreshold()) {
             depthLabel.setForeground(JBColor.GREEN);
-        } else if (depth < 9) {
+        } else if (depth < settings.getHighDepthThreshold()) {
             depthLabel.setForeground(JBColor.ORANGE);
         } else {
             depthLabel.setForeground(JBColor.RED);

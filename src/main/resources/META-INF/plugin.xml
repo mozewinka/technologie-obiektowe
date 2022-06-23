@@ -6,6 +6,12 @@
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.java</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="com.github.mozewinka.technologieobiektowe.Settings"/>
+        <applicationConfigurable id="configuration" displayName="Technologie Obiektowe"
+                                 instance="com.github.mozewinka.technologieobiektowe.Configuration" groupId="tools"/>
+    </extensions>
     
     <actions>
         <group id="Technologie-Obiektowe.MainGroup" text="Technologie Obiektowe"
