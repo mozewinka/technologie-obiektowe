@@ -30,6 +30,7 @@ public class ClassListDialog extends JDialog {
     private JLabel interfacesLabel;
     private JLabel methodsLabel;
     private JLabel depthLabel;
+    private JLabel metricsLabel;
 
     private final ClassHelper classHelper;
     private final DiagramHelper diagramHelper;
@@ -42,6 +43,7 @@ public class ClassListDialog extends JDialog {
 
         classHelper = new ClassHelper(project);
         diagramHelper = new DiagramHelper();
+        metricsLabel.setText(new MetricsDialog(project).getMetricsLabel().getText());
 
         HashMap<String, PsiClass> classesMap = classHelper.classesMap;
         classes.setListData(classesMap.keySet().toArray(new String[0]));
@@ -65,7 +67,6 @@ public class ClassListDialog extends JDialog {
             } else {
                 interfacesLabel.setForeground(JBColor.RED);
             }
-
             depthLabel.setText("Depth of Inheritance Tree: " + getDepth(classesMap.get(classes.getSelectedValue())));
         });
 

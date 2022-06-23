@@ -48,6 +48,10 @@ public class MetricsDialog extends JDialog {
         dispose();
     }
 
+    public JLabel getMetricsLabel() {
+        return metricsLabel;
+    }
+
     private void multiCounter(ClassHelper classHelper) {
         classesCount = classHelper.classes.size();
         packagesCount = classHelper.packages.size();
