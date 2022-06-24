@@ -51,11 +51,12 @@ public class ClassListDialog extends JDialog {
         classes.addListSelectionListener(e -> {
             fields.setListData(ClassHelper.fieldsToString(classes.getSelectedValue(), classesMap));
             fieldsLabel.setText("Fields: " + fields.getItemsCount() + " (" +
-                    countStatic(classesMap.get(classes.getSelectedValue()).getFields()) + " static)");
+                    countStatic(classesMap.get(classes.getSelectedValue()).getFields()) + " static");
 
             methods.setListData(ClassHelper.methodsToString(classes.getSelectedValue(), classesMap));
             methodsLabel.setText("Methods: " + methods.getItemsCount() + " (" +
-                    countStatic(classesMap.get(classes.getSelectedValue()).getMethods()) + " static)");
+                    countStatic(classesMap.get(classes.getSelectedValue()).getMethods()) + " static; " +
+                    classesMap.get(classes.getSelectedValue()).getConstructors().length + " constructor)");
 
             interfaces.setListData(ClassHelper.interfacesToString(classes.getSelectedValue(), classesMap));
             int interfacesCount = interfaces.getItemsCount();

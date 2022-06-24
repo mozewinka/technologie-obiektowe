@@ -53,10 +53,10 @@ public class MetricsDialog extends JDialog {
     }
 
     private void multiCounter(ClassHelper classHelper) {
-        classesCount = classHelper.classes.size();
+        classesCount = classHelper.classesMap.size();
         packagesCount = classHelper.packages.size();
 
-        for (PsiClass cls : classHelper.classes) {
+        for (PsiClass cls : classHelper.classesMap.values()) {
             linesCount += countLines(cls);
 
             if (cls.isInterface()) {
